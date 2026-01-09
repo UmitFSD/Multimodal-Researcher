@@ -1,123 +1,136 @@
-# Multimodal Researcher Assistant — PoC
+# Multimodal AI Researcher Assistant — PoC
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React-Frontend-61DAFB?logo=react&logoColor=white&labelColor=20232A)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-412991?logo=openai&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Proof_of_Concept-orange)
 
-This project is an **Enterprise-grade** proof of concept (PoC) that demonstrates how to build a **Multimodal AI Agent** capable of "seeing" images and performing **real-time web research** to ground its answers.
 
-The focus of this PoC is not full production scalability, but validating the **agentic workflow** between Visual Input, LLM reasoning, and external Web Search tools using OpenAI's modern stateful API architecture.
+This project is a proof of concept (PoC) that demonstrates how multimodal large language models (LLMs) can be applied to complex research tasks by combining vision, text analysis, and real-time web search capabilities.
 
-## 📸 Interface Preview
+The focus of this PoC is not full production scalability, but validating the **seamless integration of vision and text**, **mathematical rendering quality**, and **user experience** under real-world research constraints.
 
-<div style="display: flex; gap: 10px;">
-  <img src="assets/demo_screenshot_1.jpg" alt="Visual Input" width="45%">
-  <img src="assets/demo_screenshot_2.jpg" alt="Research Output" width="45%">
-</div>
+<img width="1169" height="731" alt="image" src="https://github.com/user-attachments/assets/b8ac3f16-4bbb-45bf-8d6a-af1b89b8f782" />
 
----
 
 ## 🎯 Problem Statement
+Advanced research often requires more than just text-based interactions. Researchers and developers face specific challenges:
 
-Standard Chatbots and RAG systems often face two major limitations:
-1.  **Blindness:** They cannot interpret visual data (images, charts, physical objects) natively alongside text.
-2.  **Static Knowledge:** They rely on training data cut-offs, making them useless for breaking news or real-time fact-checking.
+*   **Visual Context:** Questions often relate to charts, diagrams, or physical objects that text cannot fully describe.
+*   **Stale Information:** Standard LLMs have knowledge cut-offs; research requires up-to-date web data.
+*   **Formatting Constraints:** Scientific output containing mathematical formulas (LaTeX) and code blocks is often poorly rendered in standard chat interfaces.
 
-This PoC explores how to create a unified assistant that bridges **Vision** and **Live Information**, allowing users to upload a photo of an unknown object/place and ask: *"What is this, and what are the latest news about it?"*
+This PoC explores how to unify **GPT-4o's vision capabilities** with **Web Search** tools in a single, polished UI to solve these friction points.
 
 ## 🚀 What This PoC Demonstrates
-
-* **Multimodal Reasoning:** Seamlessly combines `text` and `image_url` inputs in a single API call using GPT-4o.
-* **Agentic Web Search:** The model autonomously decides when to use the `web_search` tool based on the user's prompt.
-* **Stateful API Usage:** Instead of a complex vector database for conversation history, this PoC leverages OpenAI's `previous_response_id` to maintain context threads efficiently.
-* **Grounded Answers:** Responses are not just generated; they are researched and cited from active web sources (2024-2026 data).
-* **Modern Frontend:** A reactive, clean interface built with React/Vite that handles file streams and markdown rendering.
+*   **Multimodal Analysis:** Simultaneous processing of high-resolution images and complex text queries using GPT-4o.
+*   **Real-Time Web Research:** Autonomous decision-making by the model to perform web searches when current data is needed.
+*   **Scientific Rendering Engine:** A specialized frontend pipeline using `KaTeX` and `React Markdown` to render complex mathematical equations ($E=mc^2$) and tables perfectly.
+*   **Context-Aware Memory:** Maintains conversational context across turns using a `previous_response_id` mechanism.
+*   **Modern UX Architecture:** A clean, responsive interface built with Tailwind CSS and Lucide icons, distinguishing clearly between user input and AI analysis.
 
 ## 🏗 High-Level Architecture
-
-1.  **Input:** User uploads an image and types a query via the **React** interface.
-2.  **Processing:**
-    * The image is converted to a Data URI on the client side.
-    * The payload (Image + Text) is sent to the **FastAPI** backend.
-3.  **Agent Logic:**
-    * The backend constructs a request to **OpenAI Responses API**.
-    * It injects the `previous_response_id` (if available) to restore memory.
-4.  **Execution:**
-    * **GPT-4o** analyzes the image.
-    * If needed, it triggers the **Web Search Tool** to fetch external data.
-5.  **Response:** The final synthesized answer (Markdown) is returned and rendered.
+1.  **Input:** The user uploads an image or types a query through the React interface.
+2.  **Payload Construction:** The frontend converts images to Data URIs and packages them with the text prompt.
+3.  **API Gateway:** FastAPI receives the payload and manages CORS and request validation via Pydantic models.
+4.  **Orchestration:**
+    *   The system initializes the OpenAI client with specific instructions.
+    *   If the query requires external data, the `web_search` tool is triggered automatically.
+    *   If an image is present, it is processed via the Vision endpoint.
+5.  **Generation:** GPT-4o generates a markdown-formatted response.
+6.  **Rendering:** The frontend parses the response, rendering LaTeX math, code blocks, and standard markdown in real-time.
 
 ## 🛠 Technology Stack
-
-* **Python 3.10+**
-* **FastAPI:** High-performance Backend API
-* **OpenAI GPT-4o:** Multimodal LLM & Reasoning Engine
-* **OpenAI Web Search Tool:** Real-time information retrieval
-* **React (Vite):** Frontend Framework
-* **Tailwind CSS:** Styling
-* **Lucide React:** Iconography
+*   **Python 3.10+**
+*   **FastAPI:** High-performance Backend API
+*   **React (Vite + TS):** Reactive User Interface
+*   **OpenAI GPT-4o:** Multimodal Reasoning Model
+*   **Tailwind CSS:** Styling Framework
+*   **KaTeX / Remark:** Mathematical & Markdown Rendering
 
 ## ⚖️ Design Decisions and Trade-Offs
 
-### **API-Side State Management**
-* **Decision:** The PoC uses OpenAI's `previous_response_id` parameter to handle conversation history.
-* **Why:** To avoid the complexity of setting up Redis or Postgres for a lightweight PoC. This delegates context window management to the model provider.
-* **Trade-off:** History is ephemeral to the session sequence; if the ID chain breaks, context is lost.
+### Direct Data URI for Images
+The PoC sends images directly as Base64 Data URIs to the API.
+*   **Why:** To simplify the architecture for the PoC and avoid the complexity of setting up a separate object storage service (like S3 or Azure Blob) during the validation phase.
+*   **Trade-off:** Increases payload size, which is acceptable for single-user testing but would need optimization in production.
 
-### **Direct Image Payload**
-* **Decision:** Images are sent as Base64 Data URIs directly in the JSON payload.
-* **Why:** Simulates a "serverless" approach without needing an intermediate S3 bucket or Blob Storage for temporary uploads.
-* **Trade-off:** Increases the payload size of the HTTP request, which is acceptable for a PoC but would require optimized storage strategies in production.
+### Client-Side State Management
+Conversation history is currently held in the Frontend state.
+*   **Why:** To ensure immediate UI responsiveness and reduce backend database overhead during the prototyping of the interaction model.
+*   **Future:** A persistent database (PostgreSQL/Redis) would be required for long-term history storage.
 
-### **Synchronous Agent Flow**
-* **Decision:** The request waits for the full research cycle (Image Analysis -> Search -> Synthesis) before responding.
-* **Why:** Ensures the user receives a complete, verified answer rather than a partial stream.
-* **Future:** Server-Sent Events (SSE) would be introduced for better perceived latency in production.
+### Synchronous Processing
+The chat endpoint waits for the full generation before responding.
+*   **Why:** To ensure the integrity of the markdown and math syntax before rendering.
+*   **Trade-off:** Users see a loader instead of a stream. Streaming responses would be the next step for UX improvement.
 
 ## ⚠️ PoC Scope and Known Limitations
-
-This PoC intentionally **does not** include:
-* User Authentication / Multi-tenancy
-* Persistent Database (History is RAM/Session based)
-* Streaming responses (currently request/response cycle)
-* PDF/Document parsing (Focus is on Image/Web)
+This PoC intentionally does not include:
+*   User Authentication (OAuth/JWT).
+*   Persistent database storage for chat history (Session-based only).
+*   File storage buckets (Images are transient).
+*   Streaming API responses (Server-Sent Events).
 
 ## 🔮 Production-Oriented Next Steps
-
 If extended beyond PoC, the following areas would be addressed:
-1.  **Persistence:** Integration with PostgreSQL/Supabase to store chat sessions.
-2.  **Storage:** AWS S3 or Azure Blob integration for handling high-res image uploads.
-3.  **Streaming:** Implementing streaming support on FastAPI/React for long research tasks.
-4.  **Export:** Ability to export the research results as PDF/Markdown reports.
+*   **Streaming Support:** Implementing SSE for typewriter-effect responses.
+*   **Storage Layer:** Integrating AWS S3 or Azure Blob for image handling.
+*   **Vector Memory:** Adding a vector database (Pinecone/Chroma) for long-term research memory.
+*   **Containerization:** Dockerizing frontend and backend for orchestration (K8s).
 
 ## 🚀 Quick Start & How to Use
+Follow these steps to set up and run the project locally on your machine.
 
-Follow these steps to set up and run the project locally.
+### 1. Backend Setup
+Navigate to the backend directory (root where `main.py` exists):
 
-### 1. Clone the Repository
 ```bash
-git clone [https://github.com/yourusername/multimodal-researcher.git](https://github.com/yourusername/multimodal-researcher.git)
-cd multimodal-researcher
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-2. Configure Backend
-Navigate to the backend, create environment variables, and run.
+# Install dependencies
+pip install fastapi uvicorn python-dotenv openai pydantic
+```
 
-cd backend
-# Create .env file and add: OPENAI_API_KEY="sk-..."
-pip install -r requirements.txt
+Create a `.env` file in the root directory and add your OpenAI API Key:
+
+```env
+OPENAI_API_KEY="sk-your-openai-api-key"
+```
+
+Start the Server:
+```bash
 uvicorn main:app --reload
+```
+*Server runs at: http://localhost:8000*
 
-3. Run Frontend
-Open a new terminal for the client.
+### 2. Frontend Setup
+Navigate to the frontend directory:
 
+```bash
 cd frontend
 npm install
+```
+
+Make sure specific rendering libraries are installed:
+```bash
+npm install react-markdown remark-math remark-gfm rehype-katex lucide-react
+```
+
+Start the Application:
+```bash
 npm run dev
+```
+*App runs at: http://localhost:5173*
 
-The application will open at http://localhost:5173.
+## 📖 Usage Guide
+Once the application is running:
 
-📖 Usage Guide
-Upload: Click the clip icon to upload an image (e.g., a photo of a landmark, a gadget, or a chart).
+1.  **Visual Analysis:** Click the **Paperclip** icon to upload a diagram, chart, or photo. Ask a question like *"Analyze the trend in this chart."*
+2.  **Deep Research:** Ask a question requiring current data, e.g., *"What were the latest stock market trends for AI companies yesterday?"*. The system will auto-trigger web search.
+3.  **Math & Code:** Try asking for a formula: *"Explain the Black-Scholes equation."* Observe the LaTeX rendering.
 
-Ask: Type a question like "What is the release date and price of the product in this image?"
-
-Research: The agent will recognize the object, search the web for the latest details, and answer.
-
-👨‍💻 Author
+## 👨‍💻 Author
 Umit Sener
