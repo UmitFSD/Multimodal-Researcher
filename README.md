@@ -30,15 +30,15 @@ This PoC explores how to unify **GPT-4o's vision capabilities** with **Web Searc
 *   **Modern UX Architecture:** A clean, responsive interface built with Tailwind CSS and Lucide icons, distinguishing clearly between user input and AI analysis.
 
 ## 🏗 High-Level Architecture
-1.  **Input:** The user uploads an image or types a query through the React interface.
-2.  **Payload Construction:** The frontend converts images to Data URIs and packages them with the text prompt.
-3.  **API Gateway:** FastAPI receives the payload and manages CORS and request validation via Pydantic models.
-4.  **Orchestration:**
-    *   The system initializes the OpenAI client with specific instructions.
-    *   If the query requires external data, the `web_search` tool is triggered automatically.
-    *   If an image is present, it is processed via the Vision endpoint.
-5.  **Generation:** GPT-4o generates a markdown-formatted response.
-6.  **Rendering:** The frontend parses the response, rendering LaTeX math, code blocks, and standard markdown in real-time.
+The solution implements a **Microservices-lite** architecture pattern, bridging a modern React frontend with the OpenAI Responses API through a secure FastAPI gateway.
+
+   <img width="710" height="443" alt="image" src="https://github.com/user-attachments/assets/4d59abfc-a080-44ee-8ea2-1ded0a93309b" />
+
+### Data Flow Strategy
+1.  **Ingestion:** The **React Frontend** captures multimodal input (text prompts + raw image bytes) and handles client-side state.
+2.  **Orchestration:** The **FastAPI Backend** acts as a secure proxy, restructuring the payload and validating requests via Pydantic.
+3.  **Reasoning & Retrieval:** The request is forwarded to **OpenAI `gpt-4o`**, which dynamically decides whether to use internal knowledge or trigger the **Hosted Web Search** tool.
+4.  **Rendering:** The structured response is returned to the client, where the **Markdown Engine** renders mathematical notation (LaTeX) and visual content in real-time.
 
 ## 🛠 Technology Stack
 *   **Python 3.10+**
