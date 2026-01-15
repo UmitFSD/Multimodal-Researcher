@@ -1,4 +1,5 @@
 # Multimodal AI Researcher Assistant — PoC
+### 🚀 Powered by OpenAI GPT-4o & Responses API
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-Frontend-61DAFB?logo=react&logoColor=white&labelColor=20232A)
